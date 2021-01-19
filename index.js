@@ -1,6 +1,7 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const { ApolloServer } = require("apollo-server-express");
+const cors = require("cors");
 // import typeDefs from "./typeDefs";
 // import resolvers from "./resolvers";
 const db = require("./models");
@@ -20,6 +21,7 @@ const resolvers = mergeResolvers(
 
 //started express server instance
 const app = express();
+app.use(cors("*"));
 
 // create application/x-www-form-urlencoded parser
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -31,6 +33,9 @@ const server = new ApolloServer({
 	resolvers,
 	context: {
 		models: db,
+		user: {
+			id: 1,
+		},
 	},
 });
 
@@ -38,7 +43,7 @@ const server = new ApolloServer({
 server.applyMiddleware({ app: app });
 
 db.sequelize
-	.sync({ force: true })
+	.sync()
 	.then(() => {
 		app.listen(8080, () => {
 			console.log(

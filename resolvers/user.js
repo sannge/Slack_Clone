@@ -8,7 +8,7 @@ module.exports = {
 	Mutation: {
 		createUser: async (_, args, { models }) => {
 			try {
-				const user = await models.User.create(args);
+				const user = await models.User.create();
 				return user.toJSON();
 			} catch (err) {
 				console.log(err);

@@ -17,7 +17,7 @@ module.exports = (sequelize, DataTypes) => {
 				},
 			});
 
-			Team.belongsTo(models.User, {
+			this.belongsTo(models.User, {
 				foreignKey: "owner",
 			});
 		}
