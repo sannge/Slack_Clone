@@ -12,7 +12,7 @@ module.exports = {
 				return user.toJSON();
 			} catch (err) {
 				console.log(err);
-				throw err;
+				throw new Error(err);
 			}
 		},
 	},
