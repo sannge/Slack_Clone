@@ -13,7 +13,17 @@ module.exports = gql`
 		allUsers: [User!]!
 	}
 
+	type RegisterResponse {
+		ok: Boolean!
+		user: User
+		errors: [Error!]
+	}
+
 	type Mutation {
-		createUser(username: String!, email: String!, password: String!): User!
+		register(
+			username: String!
+			email: String!
+			password: String!
+		): RegisterResponse!
 	}
 `;
