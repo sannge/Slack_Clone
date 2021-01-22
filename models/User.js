@@ -1,5 +1,7 @@
 "use strict";
 const { Model } = require("sequelize");
+const bcrypt = require("bcrypt");
+
 module.exports = (sequelize, DataTypes) => {
 	class User extends Model {
 		/**
@@ -56,12 +58,28 @@ module.exports = (sequelize, DataTypes) => {
 			password: {
 				type: DataTypes.STRING,
 				allowNull: false,
+				validate: {
+					len: {
+						args: [5, 100],
+						msg: "The password needs to be between 5 and 100 characters long",
+					},
+				},
 			},
 		},
 		{
 			sequelize,
 			tableName: "users",
 			modelName: "User",
+			//hooks beforeValidate and afterValidate in sequelize models
+			hooks: {
+				afterValidate: async (user) => {
+					user.password = await bcrypt.hash(user.password, 12);
+					// return {
+					// 	...user,
+					// 	pasworrd: hashedPassword,
+					// };
+				},
+			},
 		}
 	);
 

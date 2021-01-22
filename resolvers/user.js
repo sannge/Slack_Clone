@@ -1,45 +1,28 @@
-const bcrypt = require("bcrypt");
-const _ = require("lodash");
+const { tryLogin } = require("../auth");
+const { formatErrors } = require("../formatErrors");
 
 /*
  _.pick({a:1,b:2},'a') => {a:1}
 */
-
-const formatErrors = (e) => {
-	if (e.name === "SequelizeValidationError") {
-		return e.errors.map((x) => _.pick(x, ["path", "message"]));
-	}
-	return [{ path: "name", message: "something went wrong" }];
-};
 
 module.exports = {
 	Query: {
 		getUser: async (_, { id }, { models }) =>
 			await models.User.findOne({ where: { id } }),
 
-		allUsers: async (_, args, { models }) => await models.User.findAll(),
+		allUsers: async (_, args, context) => {
+			return await context.models.User.findAll();
+		},
 	},
 	Mutation: {
-		register: async (_, { username, email, password }, { models }) => {
-			if (password.length < 5 || password.length > 100) {
-				return {
-					ok: false,
-					errors: [
-						{
-							path: "password",
-							message:
-								"The password needs to be between 5 and 100 characters long",
-						},
-					],
-				};
-			}
+		login: (_, { email, password }, { models, SECRET, SECRET2 }) => {
+			return tryLogin(email, password, models, SECRET, SECRET2);
+		},
+		register: async (_, args, { models }) => {
 			try {
-				const hashedPassword = await bcrypt.hash(password, 12);
-				const user = await models.User.create({
-					username,
-					email,
-					password: hashedPassword,
-				});
+				//hashing password inside sequelize hook afterValidate method
+				// const hashedPassword = await bcrypt.hash(password, 12);
+				const user = await models.User.create(args);
 				return {
 					ok: true,
 					user,
