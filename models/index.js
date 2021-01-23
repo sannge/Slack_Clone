@@ -10,7 +10,11 @@ const db = {};
 
 let sequelize;
 if (config.use_env_variable) {
-	sequelize = new Sequelize(process.env[config.use_env_variable], config);
+	sequelize = new Sequelize(process.env[config.use_env_variable], {
+		...config,
+		//since cannot access Sequelize object from the json file, use this syntax
+		operatorAliases: Sequelize.Op,
+	});
 } else {
 	sequelize = new Sequelize(
 		config.database,

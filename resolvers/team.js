@@ -2,7 +2,20 @@ const { formatErrors } = require("../formatErrors");
 const { requiresAuth } = require("../permission");
 
 module.exports = {
-	Query: {},
+	Query: {
+		allTeams: requiresAuth.createResolver(async (_, args, { models, user }) => {
+			try {
+				const teams = await models.Team.findAll({
+					where: { owner: user.id },
+					raw: true,
+				});
+				console.log(teams);
+				return teams;
+			} catch (err) {
+				console.log(err);
+			}
+		}),
+	},
 	Mutation: {
 		createTeam: requiresAuth.createResolver(
 			async (_, args, { models, user }) => {
@@ -20,5 +33,10 @@ module.exports = {
 				}
 			}
 		),
+	},
+	Team: {
+		channels: async ({ id }, args, { models, user }) => {
+			return await models.Channel.findAll({ where: { teamId: id } });
+		},
 	},
 };
