@@ -28,7 +28,10 @@ module.exports = (sequelize, DataTypes) => {
 	Channel.init(
 		{
 			name: DataTypes.STRING,
-			public: DataTypes.BOOLEAN,
+			public: {
+				type: DataTypes.BOOLEAN,
+				defaultValue: true,
+			},
 		},
 		{
 			sequelize,

@@ -15,6 +15,10 @@ module.exports = {
 				allowNull: false,
 				type: Sequelize.DATE,
 			},
+			public: {
+				type: Sequelize.BOOLEAN,
+				defaultValue: true,
+			},
 			updatedAt: {
 				allowNull: false,
 				type: Sequelize.DATE,
