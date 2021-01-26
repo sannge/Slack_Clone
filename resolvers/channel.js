@@ -1,13 +1,22 @@
+const { formatErrors } = require("../formatErrors");
 module.exports = {
 	Query: {},
 	Mutation: {
 		createChannel: async (_, args, { models }) => {
+			console.log("ARGS: ", args);
 			try {
-				await models.Channel.create(args);
-				return true;
+				const channel = await models.Channel.create({ ...args, public: true });
+				console.log(channel);
+				return {
+					ok: true,
+					channel,
+				};
 			} catch (err) {
 				console.log(err);
-				return false;
+				return {
+					ok: false,
+					errors: formatErrors(err),
+				};
 			}
 		},
 	},

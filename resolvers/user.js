@@ -23,11 +23,27 @@ module.exports = {
 				//hashing password inside sequelize hook afterValidate method
 				// const hashedPassword = await bcrypt.hash(password, 12);
 				const user = await models.User.create(args);
+				if (user) {
+					console.log("USER: ", user);
+					const firstTeam = await models.Team.create({
+						name: "MY_TEAM",
+						owner: user.id,
+					});
+					console.log("FIRST TEAM: ", firstTeam);
+					if (firstTeam) {
+						const firstChannel = await models.Channel.create({
+							name: "general",
+							public: true,
+							teamId: firstTeam.id,
+						});
+					}
+				}
 				return {
 					ok: true,
 					user,
 				};
 			} catch (err) {
+				console.log(err);
 				return {
 					ok: false,
 					errors: formatErrors(err),
