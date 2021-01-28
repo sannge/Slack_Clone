@@ -1,5 +1,9 @@
 module.exports = {
-	Query: {},
+	Query: {
+		getMessages: (_, { channelId }, { models, user }) => {
+			return [];
+		},
+	},
 	Mutation: {
 		createMessage: async (_, args, { models, user }) => {
 			{

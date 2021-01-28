@@ -12,7 +12,7 @@ module.exports = (sequelize, DataTypes) => {
 		static associate(models) {
 			// define association here
 			this.belongsToMany(models.Team, {
-				through: "members",
+				through: models.Member,
 				foreignKey: {
 					name: "userId",
 					field: "user_id",
@@ -33,6 +33,7 @@ module.exports = (sequelize, DataTypes) => {
 			username: {
 				type: DataTypes.STRING,
 				allowNull: false,
+				unique: true,
 				validate: {
 					isAlphanumeric: {
 						args: true,

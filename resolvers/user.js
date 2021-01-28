@@ -24,12 +24,11 @@ module.exports = {
 				// const hashedPassword = await bcrypt.hash(password, 12);
 				const user = await models.User.create(args);
 				if (user) {
-					console.log("USER: ", user);
 					const firstTeam = await models.Team.create({
-						name: "MY_TEAM",
+						name: `${args.username.toUpperCase()}_TEAM`,
 						owner: user.id,
 					});
-					console.log("FIRST TEAM: ", firstTeam);
+
 					if (firstTeam) {
 						const firstChannel = await models.Channel.create({
 							name: "general",

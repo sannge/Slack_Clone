@@ -10,7 +10,7 @@ module.exports = (sequelize, DataTypes) => {
 		static associate(models) {
 			// define association here
 			this.belongsToMany(models.User, {
-				through: "members",
+				through: models.Member,
 				foreignKey: {
 					name: "teamId",
 					field: "team_id",
@@ -27,6 +27,7 @@ module.exports = (sequelize, DataTypes) => {
 			name: {
 				type: DataTypes.STRING,
 				allowNull: false,
+				unique: true,
 			},
 		},
 		{

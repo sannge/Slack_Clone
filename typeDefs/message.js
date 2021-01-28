@@ -6,6 +6,11 @@ module.exports = gql`
 		text: String!
 		user: User!
 		channel: Channel!
+		createdAt: String!
+	}
+
+	type Query {
+		getMessages(channelId: Int!): [Message!]!
 	}
 
 	type Mutation {
