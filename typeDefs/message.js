@@ -16,4 +16,8 @@ module.exports = gql`
 	type Mutation {
 		createMessage(channelId: Int!, text: String!): Boolean!
 	}
+
+	type Subscription {
+		newChannelMessage(channelId: Int!): Message!
+	}
 `;

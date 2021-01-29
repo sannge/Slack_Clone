@@ -21,12 +21,17 @@
 		"body-parser": "^1.19.0",
 		"cors": "^2.8.5",
 		"express": "^4.17.1",
+		"graphql": "^15.5.0",
+		"graphql-subscriptions": "^1.1.0",
+		"graphql-tools": "^7.0.2",
 		"jsonwebtoken": "^8.5.1",
 		"lodash": "^4.17.20",
 		"merge-graphql-schemas": "^1.7.8",
+		"moment": "^2.29.1",
 		"npm-run-all": "^4.1.5",
 		"pg": "^8.5.1",
 		"pg-hstore": "^2.3.3",
-		"sequelize": "^6.4.0"
+		"sequelize": "^6.4.0",
+		"subscriptions-transport-ws": "^0.9.18"
 	}
 }

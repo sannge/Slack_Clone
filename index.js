@@ -1,12 +1,18 @@
 const express = require("express");
 const bodyParser = require("body-parser");
-const { ApolloServer } = require("apollo-server-express");
+const {
+	ApolloServer,
+	gql,
+	AuthenticationError,
+} = require("apollo-server-express");
+const { createServer } = require("http");
+const { execute, subscribe } = require("graphql");
 const jwt = require("jsonwebtoken");
 const cors = require("cors");
-// import typeDefs from "./typeDefs";
-// import resolvers from "./resolvers";
+const { SubscriptionServer } = require("subscriptions-transport-ws");
 const db = require("./models");
 const { refreshTokens } = require("./auth");
+const { makeExecutableSchema } = require("graphql-tools");
 
 const path = require("path");
 const {
@@ -14,17 +20,24 @@ const {
 	mergeTypes,
 	mergeResolvers,
 } = require("merge-graphql-schemas");
-const { Console } = require("console");
 
 const SECRET = "sadfqvoht21tesldfsfndslf";
 
 const SECRET2 = "qwndbfqfg3g2ry329ytu2vgt3iquvg";
+
+const PORT = process.env.PORT || 8080;
 
 const typeDefs = mergeTypes(fileLoader(path.join(__dirname, "./typeDefs")));
 
 const resolvers = mergeResolvers(
 	fileLoader(path.join(__dirname, "./resolvers"))
 );
+
+//created a schema for websocket server
+const schema = makeExecutableSchema({
+	typeDefs,
+	resolvers,
+});
 
 //started express server instance
 const app = express();
@@ -36,9 +49,7 @@ const addUser = async (req, res, next) => {
 		try {
 			const { user } = jwt.verify(token, SECRET);
 			req.user = user;
-			console.log("HAVE TOKEN!");
 		} catch (err) {
-			console.log("DONT HAVE TOKEN");
 			const refreshToken = req.headers["x-refresh-token"];
 
 			const newTokens = await refreshTokens(
@@ -68,9 +79,8 @@ app.use(bodyParser.json());
 
 //started apollo instance
 const server = new ApolloServer({
-	typeDefs,
-	resolvers,
-	context: ({ req, res }) => {
+	schema,
+	context: ({ req, res, connection }) => {
 		return {
 			models: db,
 			user: req.user,
@@ -83,14 +93,55 @@ const server = new ApolloServer({
 //applid middleward app as server's middleward
 server.applyMiddleware({ app: app });
 
+//create http server, and instead of calling app.listen(), go for wsServer.listen()
+//to instantiate new SubscriptionServer too.
+const withWSServer = createServer(app);
+
 db.sequelize
 	.sync()
 	.then(() => {
-		app.listen(8080, () => {
-			console.log(
-				`🚀 Server ready at http://localhost:4000${server.graphqlPath}`
-			);
+		withWSServer.listen(PORT, () => {
+			console.log(`🚀 Server ready at ${PORT}`);
 			console.log("Database Connected!");
+			//if the server is created, then create subscription server within it,
+			//with the path /subscriptions.
+			new SubscriptionServer(
+				{
+					execute,
+					subscribe,
+					schema,
+					//for web socket authentication!!!!!!!!
+					onConnect: async ({ token, refreshToken }, webSocket) => {
+						if (token && refreshToken) {
+							let user = null;
+
+							try {
+								const payload = jwt.verify(token, SECRET);
+								user = payload.user;
+							} catch (err) {
+								const newTokens = await refreshTokens(
+									token,
+									refreshToken,
+									db,
+									SECRET,
+									SECRET2
+								);
+								user = newTokens.user;
+							}
+							if (!user) {
+								throw new AuthenticationError("Invalid Auth Token!");
+							}
+
+							return true;
+						}
+						throw new AuthenticationError("UNAUTHENTICATED for WS!");
+					},
+				},
+				{
+					server: withWSServer,
+					path: "/graphql",
+				}
+			);
 		});
 
 		// sequelize

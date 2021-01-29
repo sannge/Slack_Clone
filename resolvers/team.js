@@ -20,8 +20,6 @@ module.exports = {
 					include: [{ model: models.User }],
 				});
 
-				teams.forEach((t) => console.log("team: ", t.toJSON()));
-
 				// console.log(teams);
 				return teams;
 			} catch (err) {
@@ -34,7 +32,6 @@ module.exports = {
 					const teams = await models.Team.findAll({
 						include: [{ model: models.User, where: { id: user.id } }],
 					});
-					console.log(teams);
 					return teams;
 				} catch (err) {
 					console.log(err);
@@ -57,7 +54,6 @@ module.exports = {
 						});
 						return team;
 					});
-					console.log(response);
 					return {
 						ok: true,
 						team: response,
@@ -78,7 +74,6 @@ module.exports = {
 					// 	where: { id: user.id },
 					// 	raw: true,
 					// });
-					console.log("USER: ", user);
 					const teamPromise = models.Team.findOne({
 						where: { id: teamId },
 					});
@@ -117,7 +112,6 @@ module.exports = {
 					}
 
 					if (invitedUser.id === user.id) {
-						console.log("HAPPENED");
 						return {
 							ok: false,
 							errors: [
