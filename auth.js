@@ -9,7 +9,7 @@ exports.createTokens = createTokens = (user, secret, secret2) => {
 		},
 		secret,
 		{
-			expiresIn: "1m",
+			expiresIn: "1h",
 		}
 	);
 

@@ -113,11 +113,9 @@ db.sequelize
 					//for web socket authentication!!!!!!!!
 					onConnect: async ({ token, refreshToken }, webSocket) => {
 						if (token && refreshToken) {
-							let user = null;
-
 							try {
-								const payload = jwt.verify(token, SECRET);
-								user = payload.user;
+								const { user } = jwt.verify(token, SECRET);
+								return { models: db, user };
 							} catch (err) {
 								const newTokens = await refreshTokens(
 									token,
@@ -126,15 +124,10 @@ db.sequelize
 									SECRET,
 									SECRET2
 								);
-								user = newTokens.user;
+								return { models: db, user: newTokens.user };
 							}
-							if (!user) {
-								throw new AuthenticationError("Invalid Auth Token!");
-							}
-
-							return true;
 						}
-						throw new AuthenticationError("UNAUTHENTICATED for WS!");
+						return {};
 					},
 				},
 				{

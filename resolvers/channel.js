@@ -8,11 +8,11 @@ module.exports = {
 			async (_, args, { models, user }) => {
 				console.log("ARGS: ", args);
 				try {
-					const team = await models.Team.findOne({
-						where: { id: args.teamId },
+					const member = await models.Member.findOne({
+						where: { teamId: args.teamId, userId: user.id },
 						raw: true,
 					});
-					if (team.owner !== user.id) {
+					if (!member.admin) {
 						return {
 							ok: false,
 							errors: [

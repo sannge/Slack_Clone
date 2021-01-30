@@ -24,7 +24,7 @@ module.exports = (sequelize, DataTypes) => {
 	}
 	Message.init(
 		{
-			text: DataTypes.TEXT("long"),
+			text: DataTypes.TEXT,
 		},
 		{
 			sequelize,

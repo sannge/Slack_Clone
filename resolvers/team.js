@@ -3,42 +3,6 @@ const { requiresAuth } = require("../permission");
 const { Op } = require("sequelize");
 
 module.exports = {
-	Query: {
-		allTeams: requiresAuth.createResolver(async (_, args, { models, user }) => {
-			try {
-				const teams = await models.Team.findAll({
-					where: {
-						[Op.or]: [
-							{
-								owner: user.id,
-							},
-							{
-								"$Users.id$": user.id,
-							},
-						],
-					},
-					include: [{ model: models.User }],
-				});
-
-				// console.log(teams);
-				return teams;
-			} catch (err) {
-				console.log(err);
-			}
-		}),
-		invitedTeams: requiresAuth.createResolver(
-			async (_, args, { models, user }) => {
-				try {
-					const teams = await models.Team.findAll({
-						include: [{ model: models.User, where: { id: user.id } }],
-					});
-					return teams;
-				} catch (err) {
-					console.log(err);
-				}
-			}
-		),
-	},
 	Mutation: {
 		createTeam: requiresAuth.createResolver(
 			async (_, args, { models, user }) => {
@@ -46,11 +10,16 @@ module.exports = {
 					//Sequelize transaction will wait for both to be created and then return
 					//team to response. If one of them did not create, it will throw error, and roll back.
 					const response = await models.sequelize.transaction(async () => {
-						const team = await models.Team.create({ ...args, owner: user.id });
+						const team = await models.Team.create({ ...args });
 						await models.Channel.create({
 							name: "general",
 							public: true,
 							teamId: team.id,
+						});
+						await models.Member.create({
+							teamId: team.id,
+							userId: user.id,
+							admin: true,
 						});
 						return team;
 					});
@@ -74,26 +43,26 @@ module.exports = {
 					// 	where: { id: user.id },
 					// 	raw: true,
 					// });
-					const teamPromise = models.Team.findOne({
-						where: { id: teamId },
+					const memberPromise = models.Member.findOne({
+						where: { teamId, userId: user.id },
 					});
 
 					const invitedUserPromise = models.User.findOne({
 						where: { email },
 					});
 
-					const [team, invitedUser] = await Promise.all([
-						teamPromise,
+					const [member, invitedUser] = await Promise.all([
+						memberPromise,
 						invitedUserPromise,
 					]);
 
-					if (team.owner !== user.id) {
+					if (!member.admin) {
 						return {
 							ok: false,
 							errors: [
 								{
 									path: "email",
-									message: "You cannot add members to the team",
+									message: "You are not the admin of the team",
 								},
 							],
 						};
@@ -123,7 +92,7 @@ module.exports = {
 						};
 					}
 
-					await team.addUser(invitedUser);
+					await models.Member.create({ userId: invitedUser.id, teamId });
 
 					return {
 						ok: true,

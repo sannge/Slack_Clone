@@ -12,7 +12,13 @@ module.exports = (sequelize, DataTypes) => {
 		}
 	}
 	Member.init(
-		{},
+		{
+			admin: {
+				type: DataTypes.BOOLEAN,
+				allowNull: false,
+				defaultValue: false,
+			},
+		},
 		{
 			sequelize,
 			modelName: "Member",
