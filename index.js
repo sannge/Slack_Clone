@@ -98,7 +98,7 @@ server.applyMiddleware({ app: app });
 const withWSServer = createServer(app);
 
 db.sequelize
-	.sync()
+	.sync({})
 	.then(() => {
 		withWSServer.listen(PORT, () => {
 			console.log(`🚀 Server ready at ${PORT}`);

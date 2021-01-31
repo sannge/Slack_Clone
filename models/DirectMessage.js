@@ -1,7 +1,7 @@
 "use strict";
 const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
-	class Channel extends Model {
+	class DirectMessage extends Model {
 		/**
 		 * Helper method for defining associations.
 		 * This method is not a part of Sequelize lifecycle.
@@ -9,6 +9,7 @@ module.exports = (sequelize, DataTypes) => {
 		 */
 		static associate(models) {
 			// define association here
+
 			this.belongsTo(models.Team, {
 				foreignKey: {
 					name: "teamId",
@@ -16,32 +17,30 @@ module.exports = (sequelize, DataTypes) => {
 				},
 			});
 
-			this.belongsToMany(models.User, {
-				through: "channel_members",
+			this.belongsTo(models.User, {
 				foreignKey: {
-					name: "channelId",
-					field: "channel_id",
+					name: "receiverId",
+					field: "receiver_id",
+				},
+			});
+
+			this.belongsTo(models.User, {
+				foreignKey: {
+					name: "senderId",
+					field: "sender_id",
 				},
 			});
 		}
 	}
-	Channel.init(
+	DirectMessage.init(
 		{
-			name: {
-				type: DataTypes.STRING,
-				allowNull: false,
-				required: true,
-			},
-			public: {
-				type: DataTypes.BOOLEAN,
-				defaultValue: true,
-			},
+			text: DataTypes.TEXT,
 		},
 		{
 			sequelize,
-			tableName: "channels",
-			modelName: "Channel",
+			modelName: "DirectMessage",
+			tableName: "direct_messages",
 		}
 	);
-	return Channel;
+	return DirectMessage;
 };
