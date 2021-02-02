@@ -32,28 +32,9 @@ module.exports = {
 
 			return response;
 		}),
-		// allTeams: requiresAuth.createResolver(async (_, args, { models, user }) => {
-		// 	try {
-		// 		const teams = await models.Team.findAll({
-		// 			where: {
-		// 				[Op.or]: [
-		// 					{
-		// 						owner: user.id,
-		// 					},
-		// 					{
-		// 						"$Users.id$": user.id,
-		// 					},
-		// 				],
-		// 			},
-		// 			include: [{ model: models.User }],
-		// 		});
-
-		// 		// console.log(teams);
-		// 		return teams;
-		// 	} catch (err) {
-		// 		console.log(err);
-		// 	}
-		// }),
+		getUser: async (_, { userId }, { models, user }) => {
+			return await models.User.findOne({ where: { id: userId } });
+		},
 	},
 	Mutation: {
 		login: (_, { email, password }, { models, SECRET, SECRET2 }) => {

@@ -1,9 +1,7 @@
 const { AuthenticationError } = require("apollo-server-express");
-const { PubSub, withFilter } = require("graphql-subscriptions");
-const { requiresAuth } = require("../permission");
-
-const pubsub = new PubSub();
-
+const { withFilter } = require("graphql-subscriptions");
+const { requiresAuth, requiresTeamAccess } = require("../permission");
+const pubsub = require("../pubsub");
 const NEW_CHANNEL_MESSGE = "NEW_CHANNEL_MESSGE";
 
 module.exports = {
@@ -67,31 +65,19 @@ module.exports = {
 	},
 	Subscription: {
 		newChannelMessage: {
-			subscribe: withFilter(
-				// requiresAuth.createResolver(
-				(_, { channelId }, { models, user }) => {
-					//check if part of the team
-					// const channel = await models.Channel.findOne({
-					// 	where: { id: channelId },
-					// });
-					// const member = await models.Member.findOne({
-					// 	where: {
-					// 		userId: user.id,
-					// 	},
-					// });
-					// if (!member) {
-					// 	throw new AuthenticationError(
-					// 		"You have to be a member of the team to subscribe to it's messages"
-					// 	);
-					// }
-					return pubsub.asyncIterator(["NEW_CHANNEL_MESSGE"]);
-				},
+			subscribe: requiresTeamAccess.createResolver(
+				withFilter(
+					// requiresAuth.createResolver(
+					() => {
+						return pubsub.asyncIterator(["NEW_CHANNEL_MESSGE"]);
+					},
 
-				// )
-				(payload, args) => {
-					console.log("from filter");
-					return payload.channelId === args.channelId;
-				}
+					// )
+					(payload, args) => {
+						console.log("from filter");
+						return payload.channelId === args.channelId;
+					}
+				)
 			),
 		},
 	},

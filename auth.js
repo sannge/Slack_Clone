@@ -13,6 +13,7 @@ exports.createTokens = createTokens = (user, secret, secret2) => {
 		}
 	);
 
+	console.log(createToken);
 	const createRefreshToken = jwt.sign(
 		{
 			user: _.pick(user, "id"),

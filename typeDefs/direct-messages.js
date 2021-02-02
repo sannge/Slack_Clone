@@ -5,12 +5,16 @@ module.exports = gql`
 		id: Int!
 		text: String!
 		sender: User!
-		receiver_id: Int!
+		receiverId: Int!
+		createdAt: String!
 	}
 	type Query {
-		DirectMessages: [DirectMessage!]!
+		directMessages(teamId: Int!, otherUserId: Int!): [DirectMessage!]
 	}
 	type Mutation {
-		createDirectMessage(receiver_id: Int!, texet: String!): Boolean!
+		createDirectMessage(receiverId: Int!, text: String!, teamId: Int!): Boolean!
+	}
+	type Subscription {
+		newDirectMessage(teamId: Int!, userId: Int!): DirectMessage!
 	}
 `;

@@ -3,26 +3,48 @@ const { requiresAuth } = require("../permission");
 const { Op } = require("sequelize");
 
 module.exports = {
+	Query: {
+		getTeamMembers: requiresAuth.createResolver(
+			async (_, { teamId }, { user, models }) => {
+				console.log("hi");
+				const teamMembers = models.User.findAll({
+					include: [{ model: models.Team, as: "teams", where: { id: teamId } }],
+				});
+				return teamMembers;
+			}
+		),
+	},
 	Mutation: {
 		createTeam: requiresAuth.createResolver(
 			async (_, args, { models, user }) => {
 				try {
 					//Sequelize transaction will wait for both to be created and then return
 					//team to response. If one of them did not create, it will throw error, and roll back.
-					const response = await models.sequelize.transaction(async () => {
-						const team = await models.Team.create({ ...args });
-						await models.Channel.create({
-							name: "general",
-							public: true,
-							teamId: team.id,
-						});
-						await models.Member.create({
-							teamId: team.id,
-							userId: user.id,
-							admin: true,
-						});
-						return team;
-					});
+					const response = await models.sequelize.transaction(
+						async (transaction) => {
+							const team = await models.Team.create(
+								{ ...args },
+								{ transaction }
+							);
+							await models.Channel.create(
+								{
+									name: "general",
+									public: true,
+									teamId: team.id,
+								},
+								{ transaction }
+							);
+							await models.Member.create(
+								{
+									teamId: team.id,
+									userId: user.id,
+									admin: true,
+								},
+								{ transaction }
+							);
+							return team;
+						}
+					);
 					return {
 						ok: true,
 						team: response,
@@ -110,6 +132,17 @@ module.exports = {
 	Team: {
 		channels: async ({ id }, args, { models, user }) => {
 			return await models.Channel.findAll({ where: { teamId: id } });
+		},
+		directMessageMembers: async ({ id }, args, { models, user }) => {
+			const response = await models.sequelize.query(
+				"select distinct on (u.id) u.id, u.username from users as u join direct_messages as dm on (u.id = dm.sender_id) or (u.id = dm.receiver_id) where (:currentUserId = dm.sender_id or :currentUserId = dm.receiver_id) and dm.team_id = :teamId",
+				{
+					replacements: { currentUserId: user.id, teamId: id },
+					model: models.User,
+					raw: true,
+				}
+			);
+			return response;
 		},
 	},
 };

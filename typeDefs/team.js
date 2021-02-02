@@ -4,7 +4,7 @@ module.exports = gql`
 	type Team {
 		id: Int!
 		name: String!
-		members: [User!]!
+		directMessageMembers: [User!]
 		channels: [Channel!]!
 		admin: Boolean!
 	}
@@ -23,6 +23,7 @@ module.exports = gql`
 	type Query {
 		allTeams: [Team!]!
 		invitedTeams: [Team!]!
+		getTeamMembers(teamId: Int!): [User!]!
 	}
 
 	type Mutation {
