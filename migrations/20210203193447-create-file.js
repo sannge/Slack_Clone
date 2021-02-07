@@ -1,15 +1,15 @@
 "use strict";
 module.exports = {
 	up: async (queryInterface, Sequelize) => {
-		await queryInterface.createTable("direct_messages", {
+		await queryInterface.createTable("files", {
 			id: {
 				allowNull: false,
 				autoIncrement: true,
 				primaryKey: true,
 				type: Sequelize.INTEGER,
 			},
-			text: {
-				type: Sequelize.TEXT,
+			url: {
+				type: Sequelize.STRING,
 			},
 			createdAt: {
 				allowNull: false,
@@ -22,6 +22,6 @@ module.exports = {
 		});
 	},
 	down: async (queryInterface, Sequelize) => {
-		await queryInterface.dropTable("direct_messages");
+		await queryInterface.dropTable("files");
 	},
 };

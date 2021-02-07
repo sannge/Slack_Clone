@@ -27,6 +27,14 @@ module.exports = (sequelize, DataTypes) => {
 					field: "user_id",
 				},
 			});
+
+			this.belongsToMany(models.Channel, {
+				through: models.PCMember,
+				foreignKey: {
+					name: "userId",
+					field: "user_id",
+				},
+			});
 		}
 	}
 	User.init(

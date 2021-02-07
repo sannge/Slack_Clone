@@ -20,6 +20,7 @@ module.exports = gql`
 			teamId: Int!
 			name: String!
 			public: Boolean = false
+			members: [Int!] = []
 		): ChannelResponse!
 	}
 `;

@@ -5,6 +5,7 @@ const {
 	gql,
 	AuthenticationError,
 } = require("apollo-server-express");
+require("dotenv/config");
 const { createServer } = require("http");
 const { execute, subscribe } = require("graphql");
 const jwt = require("jsonwebtoken");
@@ -98,7 +99,7 @@ server.applyMiddleware({ app: app });
 const withWSServer = createServer(app);
 
 db.sequelize
-	.sync({})
+	.sync()
 	.then(() => {
 		withWSServer.listen(PORT, () => {
 			console.log(`🚀 Server ready at ${PORT}`);

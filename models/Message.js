@@ -20,6 +20,14 @@ module.exports = (sequelize, DataTypes) => {
 				as: "user",
 				foreignKey: "userId",
 			});
+
+			this.hasMany(models.File, {
+				as: "files",
+				foreignKey: {
+					name: "messageId",
+					field: "message_id",
+				},
+			});
 		}
 	}
 	Message.init(
@@ -30,6 +38,8 @@ module.exports = (sequelize, DataTypes) => {
 			sequelize,
 			tableName: "messages",
 			modelName: "Message",
+			indexes: [{ fields: ["created_at"] }],
+			//need to order the query by the index here
 		}
 	);
 	return Message;

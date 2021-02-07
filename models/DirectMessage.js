@@ -30,6 +30,14 @@ module.exports = (sequelize, DataTypes) => {
 					field: "sender_id",
 				},
 			});
+
+			this.hasMany(models.DirectMessageFile, {
+				as: "files",
+				foreignKey: {
+					name: "directMessageId",
+					field: "direct_message_id",
+				},
+			});
 		}
 	}
 	DirectMessage.init(
@@ -40,6 +48,7 @@ module.exports = (sequelize, DataTypes) => {
 			sequelize,
 			modelName: "DirectMessage",
 			tableName: "direct_messages",
+			indexes: [{ fields: ["created_at"] }],
 		}
 	);
 	return DirectMessage;

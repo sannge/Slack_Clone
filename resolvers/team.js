@@ -1,5 +1,5 @@
 const { formatErrors } = require("../formatErrors");
-const { requiresAuth } = require("../permission");
+const { requiresAuth } = require("../util/permission");
 const { Op } = require("sequelize");
 
 module.exports = {
@@ -131,7 +131,18 @@ module.exports = {
 	},
 	Team: {
 		channels: async ({ id }, args, { models, user }) => {
-			return await models.Channel.findAll({ where: { teamId: id } });
+			return models.sequelize.query(
+				`
+			select distinct on (id) *
+			from channels as c left outer join pc_members as pc 
+			on c.id = pc.channel_id
+			where c.team_id = :teamId and (c.public = true or pc.user_id = :userId);`,
+				{
+					replacements: { teamId: id, userId: user.id },
+					model: models.Channel,
+					raw: true,
+				}
+			);
 		},
 		directMessageMembers: async ({ id }, args, { models, user }) => {
 			const response = await models.sequelize.query(

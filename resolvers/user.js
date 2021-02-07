@@ -1,6 +1,6 @@
 const { tryLogin } = require("../auth");
 const { formatErrors } = require("../formatErrors");
-const { requiresAuth } = require("../permission");
+const { requiresAuth } = require("../util/permission");
 
 /*
  _.pick({a:1,b:2},'a') => {a:1}
